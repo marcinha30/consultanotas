@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consulta NF-e / NFC-e</title>
+
+    <style>
+        *{
+            box-sizing:border-box;
+        }
+
+        body{
+            font-family:Arial, Helvetica, sans-serif;
+            background:#35424a;
+            color:white;
+            text-align:center;
+            padding:40px 15px;
+            margin:0;
+        }
+
+        h1{
+            margin-bottom:30px;
+        }
+
+        input{
+            width:min(500px, 100%);
+            padding:12px;
+            font-size:18px;
+            border:none;
+            border-radius:5px;
+            text-align:center;
+        }
+
+        button,
+        .botao-link{
+            display:inline-block;
+            padding:12px 20px;
+            background:#e8491d;
+            color:white;
+            border:none;
+            cursor:pointer;
+            font-size:18px;
+            border-radius:5px;
+            margin-top:10px;
+            text-decoration:none;
+        }
+
+        button:hover,
+        .botao-link:hover{
+            background:#c0392b;
+        }
+
+        .card{
+            margin-top:30px;
+            padding:25px;
+            background:#455a64;
+            border-radius:15px;
+            box-shadow:0 0 15px rgba(0,0,0,.3);
+            display:inline-block;
+            width:min(560px, 100%);
+        }
+
+        .logo-area{
+            width:125px;
+            height:95px;
+            margin:0 auto 15px;
+            background:white;
+            border-radius:12px;
+            padding:6px;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            overflow:hidden;
+        }
+
+        .logo-area img{
+            max-width:100%;
+            max-height:100%;
+            object-fit:contain;
+            display:block;
+        }
+
+        .logo-fallback{
+            width:100%;
+            height:100%;
+            border-radius:8px;
+            background:linear-gradient(135deg, #1b5e20, #fdd835, #0d47a1);
+            color:white;
+            display:none;
+            align-items:center;
+            justify-content:center;
+            flex-direction:column;
+            font-weight:bold;
+            text-shadow:0 1px 3px rgba(0,0,0,.5);
+        }
+
+        .logo-fallback span:first-child{
+            font-size:34px;
+            line-height:1;
+        }
+
+        .logo-fallback span:last-child{
+            font-size:12px;
+            margin-top:4px;
+        }
+
+        .alerta{
+            background:#2e7d32;
+            padding:10px;
+            border-radius:8px;
+            margin-bottom:15px;
+        }
+
+        .erro{
+            margin:25px auto 0;
+            background:#b71c1c;
+            color:white;
+            padding:15px;
+            border-radius:10px;
+            width:min(500px, 100%);
+            font-weight:bold;
+        }
+
+        p{
+            word-break:break-all;
+        }
+
+        .botoes{
+            display:flex;
+            gap:10px;
+            justify-content:center;
+            flex-wrap:wrap;
+            margin-top:10px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Consulta de NF-e / NFC-e</h1>
+
+    <input
+        type="text"
+        id="chave"
+        maxlength="44"
+        inputmode="numeric"
+        oninput="this.value=this.value.replace(/\D/g,'')"
+        placeholder="Digite a chave da nota">
+
+    <br>
+
+    <button onclick="consultarNota()">Consultar</button>
+
+    <div id="resultado"></div>
+
+    <script>
+        const estados = {
+            "11": { nome:"Rondônia", uf:"RO", logo:"https://upload.wikimedia.org/wikipedia/commons/f/fa/Bandeira_de_Rond%C3%B4nia.svg" },
+            "12": { nome:"Acre", uf:"AC", logo:"https://upload.wikimedia.org/wikipedia/commons/4/4c/Bandeira_do_Acre.svg" },
+            "13": { nome:"Amazonas", uf:"AM", logo:"https://upload.wikimedia.org/wikipedia/commons/6/6b/Bandeira_do_Amazonas.svg" },
+            "14": { nome:"Roraima", uf:"RR", logo:"https://upload.wikimedia.org/wikipedia/commons/9/98/Bandeira_de_Roraima.svg" },
+            "15": { nome:"Pará", uf:"PA", logo:"https://upload.wikimedia.org/wikipedia/commons/0/02/Bandeira_do_Par%C3%A1.svg" },
+            "16": { nome:"Amapá", uf:"AP", logo:"https://upload.wikimedia.org/wikipedia/commons/0/0c/Bandeira_do_Amap%C3%A1.svg" },
+            "17": { nome:"Tocantins", uf:"TO", logo:"https://upload.wikimedia.org/wikipedia/commons/f/ff/Bandeira_do_Tocantins.svg" },
+            "21": { nome:"Maranhão", uf:"MA", logo:"https://upload.wikimedia.org/wikipedia/commons/4/45/Bandeira_do_Maranh%C3%A3o.svg" },
+            "22": { nome:"Piauí", uf:"PI", logo:"https://upload.wikimedia.org/wikipedia/commons/3/33/Bandeira_do_Piau%C3%AD.svg" },
+            "23": { nome:"Ceará", uf:"CE", logo:"https://upload.wikimedia.org/wikipedia/commons/2/2e/Bandeira_do_Cear%C3%A1.svg" },
+            "24": { nome:"Rio Grande do Norte", uf:"RN", logo:"https://upload.wikimedia.org/wikipedia/commons/3/30/Bandeira_do_Rio_Grande_do_Norte.svg" },
+            "25": { nome:"Paraíba", uf:"PB", logo:"https://upload.wikimedia.org/wikipedia/commons/b/bb/Bandeira_da_Para%C3%ADba.svg" },
+            "26": { nome:"Pernambuco", uf:"PE", logo:"https://upload.wikimedia.org/wikipedia/commons/5/59/Bandeira_de_Pernambuco.svg" },
+            "27": { nome:"Alagoas", uf:"AL", logo:"https://upload.wikimedia.org/wikipedia/commons/8/88/Bandeira_de_Alagoas.svg" },
+            "28": { nome:"Sergipe", uf:"SE", logo:"https://upload.wikimedia.org/wikipedia/commons/b/be/Bandeira_de_Sergipe.svg" },
+            "29": { nome:"Bahia", uf:"BA", logo:"https://upload.wikimedia.org/wikipedia/commons/2/28/Bandeira_da_Bahia.svg" },
+            "31": { nome:"Minas Gerais", uf:"MG", logo:"https://upload.wikimedia.org/wikipedia/commons/f/f4/Bandeira_de_Minas_Gerais.svg" },
+            "32": { nome:"Espírito Santo", uf:"ES", logo:"https://upload.wikimedia.org/wikipedia/commons/4/43/Bandeira_do_Esp%C3%ADrito_Santo.svg" },
+            "33": { nome:"Rio de Janeiro", uf:"RJ", logo:"https://upload.wikimedia.org/wikipedia/commons/7/73/Bandeira_do_estado_do_Rio_de_Janeiro.svg" },
+            "35": { nome:"São Paulo", uf:"SP", logo:"https://upload.wikimedia.org/wikipedia/commons/2/2b/Bandeira_do_estado_de_S%C3%A3o_Paulo.svg" },
+            "41": { nome:"Paraná", uf:"PR", logo:"https://upload.wikimedia.org/wikipedia/commons/9/93/Bandeira_do_Paran%C3%A1.svg" },
+            "42": { nome:"Santa Catarina", uf:"SC", logo:"https://upload.wikimedia.org/wikipedia/commons/1/1a/Bandeira_de_Santa_Catarina.svg" },
+            "43": { nome:"Rio Grande do Sul", uf:"RS", logo:"https://upload.wikimedia.org/wikipedia/commons/6/63/Bandeira_do_Rio_Grande_do_Sul.svg" },
+            "50": { nome:"Mato Grosso do Sul", uf:"MS", logo:"https://upload.wikimedia.org/wikipedia/commons/6/64/Bandeira_de_Mato_Grosso_do_Sul.svg" },
+            "51": { nome:"Mato Grosso", uf:"MT", logo:"https://upload.wikimedia.org/wikipedia/commons/0/0b/Bandeira_de_Mato_Grosso.svg" },
+            "52": { nome:"Goiás", uf:"GO", logo:"https://upload.wikimedia.org/wikipedia/commons/b/be/Flag_of_Goi%C3%A1s.svg" },
+            "53": { nome:"Distrito Federal", uf:"DF", logo:"https://upload.wikimedia.org/wikipedia/commons/3/3c/Bandeira_do_Distrito_Federal_%28Brasil%29.svg" }
+        };
+
+        const urlsNfcePorUF = {
+            "11":"https://www.sefin.ro.gov.br/nfe/consultanfce.htm",
+            "12":"https://www.sefaznet.ac.gov.br/nfe/consulta",
+            "13":"https://sistemas.sefaz.am.gov.br/nfceweb/consultarNFCe.jsp",
+            "14":"https://www.sefaz.rr.gov.br/nfe/servlet/wp_consulta_nfce",
+            "15":"https://appnfc.sefa.pa.gov.br/portal/view/consultas/nfce/nfceForm.seam",
+            "16":"https://www.sefaz.ap.gov.br/nfce/consulta",
+            "17":"https://www.sefaz.to.gov.br/nfce/consulta",
+            "21":"https://sistemas1.sefaz.ma.gov.br/portalsefaz/jsp/pagina/pagina.jsf",
+            "22":"https://webas.sefaz.pi.gov.br/nfceweb/consultarNFCe.jsf",
+            "23":"https://nfce.sefaz.ce.gov.br/pages/consultaNota.jsf",
+            "24":"https://nfce.set.rn.gov.br/consultarNFCe.aspx",
+            "25":"https://www.sefaz.pb.gov.br/nfce",
+            "26":"https://nfce.sefaz.pe.gov.br/nfce-web/consultarNFCe",
+            "27":"https://nfce.sefaz.al.gov.br/consultaNFCe.htm",
+            "28":"https://www.sefaz.se.gov.br/portal/portalInternet.jsp",
+            "29":"https://nfe.sefaz.ba.gov.br/servicos/nfce/default.aspx",
+            "31":"https://portalsped.fazenda.mg.gov.br/spedmg/nfce",
+            "32":"https://app.sefaz.es.gov.br/ConsultaNFCe",
+            "33":"https://consultadfe.fazenda.rj.gov.br/consultaNFCe",
+            "35":"https://www.nfce.fazenda.sp.gov.br/consulta",
+            "41":"https://www.fazenda.pr.gov.br/nfce/qrcode",
+            "42":"https://sat.sef.sc.gov.br/tax.NET/Sat.Dfe.NFCe.Web/ConsultaNfce.aspx",
+            "43":"https://www.sefaz.rs.gov.br/NFCE/NFCE-COM.aspx",
+            "50":"https://www.dfe.ms.gov.br/nfce",
+            "51":"https://www.sefaz.mt.gov.br/nfce/consultanfce",
+            "52":"https://www.sefaz.go.gov.br/nfeweb/sites/nfce/danfeNFCe",
+            "53":"https://dec.fazenda.df.gov.br/ConsultarNFCe.aspx"
+        };
+
+        function consultarNota(){
+            const chave = document.getElementById("chave").value.replace(/\D/g, '');
+            const resultado = document.getElementById("resultado");
+            resultado.innerHTML = "";
+
+            if(chave.length !== 44){
+                resultado.innerHTML = `<div class="erro">A chave precisa ter 44 dígitos</div>`;
+                return;
+            }
+
+            const codigoUF = chave.substring(0, 2);
+            const modelo = chave.substring(20, 22);
+            const estado = estados[codigoUF];
+
+            if(!estado){
+                resultado.innerHTML = `<div class="erro">Estado não identificado</div>`;
+                return;
+            }
+
+            let tipoDocumento = "Documento Fiscal";
+            let urlConsulta = "";
+            let textoBotao = "Abrir consulta";
+
+            if(modelo === "55"){
+                tipoDocumento = "NF-e";
+                urlConsulta = "https://www.nfe.fazenda.gov.br/portal/consultaRecaptcha.aspx?tipoConsulta=resumo&tipoConteudo=d09fwabTnLk=";
+                textoBotao = "Abrir Portal NF-e";
+            }
+            else if(modelo === "65"){
+                tipoDocumento = "NFC-e";
+                urlConsulta = urlsNfcePorUF[codigoUF];
+                textoBotao = "Abrir SEFAZ NFC-e";
+            }
+            else{
+                urlConsulta = "https://www.nfe.fazenda.gov.br/portal/consultaRecaptcha.aspx?tipoConsulta=resumo&tipoConteudo=d09fwabTnLk=";
+                textoBotao = "Abrir consulta nacional";
+            }
+
+            if(!urlConsulta){
+                resultado.innerHTML = `<div class="erro">Consulta não encontrada para este estado</div>`;
+                return;
+            }
+
+            localStorage.setItem("ultimaChave", chave);
+
+            resultado.innerHTML = `
+                <div class="card">
+                    <div class="logo-area">
+                        <img src="${estado.logo}" alt="Bandeira de ${estado.nome}" onerror="mostrarLogoFallback(this, '${estado.uf}')">
+                        <div class="logo-fallback">
+                            <span>${estado.uf}</span>
+                            <span>SEFAZ</span>
+                        </div>
+                    </div>
+
+                    <div class="alerta">Documento localizado em ${estado.nome}</div>
+
+                    <h2>${estado.nome} (${estado.uf})</h2>
+                    <h3>${tipoDocumento}</h3>
+
+                    <p><b>Chave:</b></p>
+                    <p>${chave}</p>
+
+                    <div class="botoes">
+                        <a class="botao-link" href="${urlConsulta}" target="_blank" rel="noopener noreferrer">
+                            ${textoBotao}
+                        </a>
+
+                        <button onclick="copiarChave('${chave}')">Copiar Chave</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function mostrarLogoFallback(img, uf){
+            img.style.display = "none";
+            const fallback = img.parentElement.querySelector(".logo-fallback");
+            fallback.style.display = "flex";
+            fallback.querySelector("span:first-child").textContent = uf;
+        }
+
+        function copiarChave(chave){
+            navigator.clipboard.writeText(chave).then(function(){
+                alert("Chave copiada");
+            }).catch(function(){
+                alert("Não foi possível copiar automaticamente. Copie a chave manualmente.");
+            });
+        }
+
+        document.getElementById("chave").addEventListener("keyup", function(){
+            if(this.value.length === 44){
+                consultarNota();
+            }
+        });
+
+        window.addEventListener("load", function(){
+            const ultimaChave = localStorage.getItem("ultimaChave");
+            if(ultimaChave){
+                document.getElementById("chave").value = ultimaChave;
+            }
+        });
+    </script>
+</body>
+</html>
