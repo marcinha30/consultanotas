@@ -3,132 +3,384 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Consulta NF-e / NFC-e</title>
+    <title>Monitor SEFAZ | Consulta NF-e / NFC-e</title>
 
     <style>
+        :root{
+            --bg-900:#020b14;
+            --bg-850:#03111d;
+            --bg-800:#061927;
+            --cyan:#13d9dd;
+            --cyan-soft:#74f7ff;
+            --cyan-dark:#087785;
+            --green:#18ee75;
+            --green-dark:#02a85d;
+            --text:#f4fbff;
+            --muted:#b8c7d6;
+            --line:rgba(19,217,221,.38);
+            --shadow:0 26px 70px rgba(0,0,0,.55);
+        }
+
         *{
             box-sizing:border-box;
         }
 
+        html{
+            min-height:100%;
+            background:var(--bg-900);
+        }
+
         body{
-            font-family:Arial, sans-serif;
-            background:
-                radial-gradient(circle at top left, #00d4ff 0, transparent 32%),
-                radial-gradient(circle at bottom right, #ff8a00 0, transparent 30%),
-                linear-gradient(135deg, #14213d, #006d77 45%, #2a9d8f);
-            color:white;
-            text-align:center;
-            padding:30px;
-            margin:0;
             min-height:100vh;
+            margin:0;
+            font-family:Arial, Helvetica, sans-serif;
+            color:var(--text);
+            background:
+                radial-gradient(circle at 8% 92%, rgba(10,229,197,.32) 0 0, transparent 20%),
+                radial-gradient(circle at 92% 12%, rgba(10,193,184,.28) 0 0, transparent 28%),
+                linear-gradient(135deg, #020812 0%, #041626 48%, #042f31 100%);
+            display:flex;
+            justify-content:center;
+            align-items:center;
+            padding:20px;
+            overflow-x:hidden;
+        }
+
+        .stage{
+            width:min(1180px, 100%);
+            min-height:clamp(580px, 82vh, 760px);
+            position:relative;
+            overflow:hidden;
+            border:1px solid rgba(12,222,220,.56);
+            border-radius:18px;
+            background:
+                radial-gradient(circle at 16% 100%, rgba(2,210,176,.22), transparent 26%),
+                radial-gradient(circle at 88% 22%, rgba(0,183,191,.24), transparent 32%),
+                linear-gradient(140deg, rgba(2,14,25,.96), rgba(3,23,38,.94) 58%, rgba(4,80,73,.86));
+            box-shadow:var(--shadow), inset 0 0 90px rgba(8,216,219,.09);
+            padding:24px 24px 40px;
+        }
+
+        .stage::before{
+            content:"";
+            position:absolute;
+            inset:22px auto auto 22px;
+            width:260px;
+            height:240px;
+            opacity:.22;
+            background-image:radial-gradient(circle, rgba(0,229,234,.9) 0 2px, transparent 2.5px);
+            background-size:22px 25px;
+            mask-image:linear-gradient(90deg, #000 0%, rgba(0,0,0,.7) 58%, transparent 100%);
+            pointer-events:none;
+        }
+
+        .stage::after{
+            content:"";
+            position:absolute;
+            left:-78px;
+            bottom:-92px;
+            width:250px;
+            height:250px;
+            border-radius:50%;
+            border:88px solid rgba(9,214,193,.35);
+            opacity:.7;
+            pointer-events:none;
+        }
+
+        .doc-watermark{
+            position:absolute;
+            right:34px;
+            top:42px;
+            width:180px;
+            height:210px;
+            opacity:.22;
+            color:var(--cyan);
+            pointer-events:none;
+        }
+
+        .brand{
+            position:relative;
+            z-index:2;
+            display:flex;
+            justify-content:center;
+            align-items:center;
+            gap:16px;
+            margin-bottom:22px;
+        }
+
+        .brand-icon{
+            width:92px;
+            height:80px;
+            filter:drop-shadow(0 14px 22px rgba(4,238,154,.2));
+        }
+
+        .brand-text{
+            line-height:.86;
+            text-transform:uppercase;
+            letter-spacing:.03em;
+        }
+
+        .brand-text span{
+            display:block;
+            color:#10a8c5;
+            font-size:20px;
+            font-weight:300;
+            text-shadow:0 0 20px rgba(0,216,228,.22);
+        }
+
+        .brand-text strong{
+            display:block;
+            margin-top:8px;
+            color:var(--green);
+            font-size:38px;
+            font-weight:900;
+            letter-spacing:.04em;
+            text-shadow:0 0 22px rgba(4,238,117,.42);
+        }
+
+        .panel{
+            width:min(850px, calc(100% - 60px));
+            margin:0 auto;
+            position:relative;
+            z-index:2;
+            border:1px solid rgba(25,215,225,.43);
+            border-radius:22px;
+            background:
+                linear-gradient(180deg, rgba(6,29,47,.88), rgba(2,16,29,.96)),
+                radial-gradient(circle at top, rgba(20,235,239,.12), transparent 48%);
+            box-shadow:0 30px 70px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.06);
+            padding:24px 38px 20px;
         }
 
         h1{
-            margin-bottom:10px;
-            font-size:34px;
-            text-shadow:0 3px 10px rgba(0,0,0,.35);
+            margin:0;
+            text-align:center;
+            font-size:clamp(22px, 2.8vw, 32px);
+            letter-spacing:.03em;
+            font-weight:900;
+            text-shadow:0 5px 14px rgba(0,0,0,.55);
+        }
+
+        .title-accent{
+            display:block;
+            width:70px;
+            height:5px;
+            margin:16px auto 18px;
+            border-radius:999px;
+            background:linear-gradient(90deg, var(--green), var(--cyan));
+            box-shadow:0 0 16px rgba(14,235,178,.72);
         }
 
         .subtitulo{
-            color:#f1faee;
-            margin-bottom:25px;
-            font-size:18px;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            gap:12px;
+            margin:0 0 22px;
+            color:#cdd9e6;
+            font-size:14px;
+            text-align:center;
         }
 
-        .area-consulta{
-            background:rgba(255,255,255,.15);
-            backdrop-filter:blur(10px);
-            padding:28px;
-            border-radius:22px;
-            display:inline-block;
-            max-width:680px;
-            width:100%;
-            box-shadow:0 18px 45px rgba(0,0,0,.28);
-            border:1px solid rgba(255,255,255,.25);
+        .subtitulo svg{
+            flex:0 0 auto;
+            color:var(--cyan);
+            filter:drop-shadow(0 0 8px rgba(11,239,216,.35));
+        }
+
+        .field-heading{
+            display:flex;
+            align-items:center;
+            gap:12px;
+            margin:0 0 10px;
+        }
+
+        .field-icon{
+            width:48px;
+            height:48px;
+            border-radius:50%;
+            display:grid;
+            place-items:center;
+            color:var(--green);
+            border:1px solid rgba(23,244,170,.86);
+            background:radial-gradient(circle at 35% 25%, rgba(28,252,123,.24), rgba(7,52,63,.75));
+            box-shadow:0 0 24px rgba(0,232,194,.23);
         }
 
         label{
             display:block;
-            text-align:left;
-            margin-bottom:8px;
-            font-weight:bold;
-            color:#ffffff;
+            margin:0;
+            color:#f8fbff;
+            font-size:16px;
+            font-weight:900;
+            letter-spacing:.01em;
+            text-shadow:0 4px 12px rgba(0,0,0,.45);
         }
 
         input{
             width:100%;
-            padding:16px;
-            font-size:18px;
-            border:3px solid transparent;
-            border-radius:12px;
-            margin-bottom:14px;
+            padding:10px 14px;
+            min-height:50px;
+            font-size:16px;
+            border:1px solid rgba(178,244,255,.82);
+            border-radius:8px;
             outline:none;
-            color:#1d3557;
-            background:#ffffff;
-            box-shadow:0 8px 18px rgba(0,0,0,.15);
+            color:#f8fbff;
+            background:rgba(2,15,27,.78);
+            box-shadow:inset 0 0 0 1px rgba(255,255,255,.03), 0 14px 32px rgba(0,0,0,.22);
+            transition:border-color .2s ease, box-shadow .2s ease, background .2s ease;
+        }
+
+        input::placeholder{
+            color:rgba(213,220,231,.52);
         }
 
         input:focus{
-            border-color:#ffbe0b;
-            box-shadow:0 0 0 4px rgba(255,190,11,.25);
+            border-color:var(--green);
+            background:rgba(4,22,34,.95);
+            box-shadow:0 0 0 4px rgba(8,236,166,.13), 0 0 32px rgba(8,236,166,.2);
         }
 
         .linha-botoes{
             display:flex;
-            gap:12px;
+            gap:18px;
             justify-content:center;
+            align-items:center;
             flex-wrap:wrap;
+            margin-top:20px;
         }
 
         button,
         .botao-link{
-            padding:13px 20px;
-            background:linear-gradient(135deg, #ff006e, #fb5607);
-            color:white;
-            border:none;
+            appearance:none;
+            min-width:200px;
+            min-height:50px;
+            padding:12px 18px;
+            display:inline-flex;
+            align-items:center;
+            justify-content:center;
+            gap:16px;
+            border-radius:10px;
+            border:1px solid rgba(19,217,221,.58);
             cursor:pointer;
-            font-size:17px;
-            font-weight:bold;
-            border-radius:12px;
+            color:#f7ffff;
+            background:linear-gradient(135deg, rgba(4,24,39,.96), rgba(5,39,55,.92));
+            font-size:16px;
+            font-weight:900;
+            text-transform:uppercase;
             text-decoration:none;
-            display:inline-block;
-            box-shadow:0 8px 18px rgba(0,0,0,.22);
-            transition:.2s ease;
+            letter-spacing:.01em;
+            box-shadow:0 18px 34px rgba(0,0,0,.26), inset 0 1px 0 rgba(255,255,255,.06);
+            transition:transform .18s ease, filter .18s ease, box-shadow .18s ease, border-color .18s ease;
         }
 
         button:hover,
         .botao-link:hover{
             transform:translateY(-2px);
             filter:brightness(1.08);
+            border-color:rgba(29,246,218,.9);
+            box-shadow:0 22px 40px rgba(0,0,0,.32), 0 0 22px rgba(13,227,215,.16);
+        }
+
+        button:active,
+        .botao-link:active{
+            transform:translateY(0);
+        }
+
+        .botao-primario{
+            background:linear-gradient(135deg, #04d864, #05a99b);
+            border-color:rgba(35,253,159,.56);
+            box-shadow:0 18px 34px rgba(2,208,116,.22), inset 0 1px 0 rgba(255,255,255,.18);
         }
 
         .botao-secundario{
-            background:linear-gradient(135deg, #3a86ff, #00b4d8);
+            background:linear-gradient(135deg, rgba(2,24,38,.98), rgba(4,35,48,.96));
+        }
+
+        .button-icon{
+            width:24px;
+            height:24px;
+            display:inline-grid;
+            place-items:center;
+            color:#ffffff;
+        }
+
+        .botao-secundario .button-icon,
+        button.botao-secundario::before{
+            color:var(--cyan);
+        }
+
+        .feature-strip{
+            margin-top:20px;
+            padding:16px 22px;
+            display:grid;
+            grid-template-columns:repeat(3, 1fr);
+            gap:0;
+            border:1px solid rgba(20,216,224,.25);
+            border-radius:12px;
+            background:rgba(3,20,33,.72);
+            box-shadow:inset 0 1px 0 rgba(255,255,255,.04);
+        }
+
+        .feature{
+            display:grid;
+            grid-template-columns:40px 1fr;
+            gap:12px;
+            align-items:center;
+            min-height:52px;
+            padding:0 16px;
+            text-align:left;
+        }
+
+        .feature + .feature{
+            border-left:1px solid rgba(21,205,221,.28);
+        }
+
+        .feature svg{
+            color:var(--cyan);
+            filter:drop-shadow(0 0 10px rgba(13,227,215,.22));
+        }
+
+        .feature strong{
+            display:block;
+            color:#a7fbff;
+            font-size:13px;
+            margin-bottom:3px;
+        }
+
+        .feature span{
+            display:block;
+            color:#c1c9d6;
+            font-size:12px;
+        }
+
+        #resultado{
+            margin-top:20px;
         }
 
         .card{
-            margin-top:25px;
-            padding:26px;
-            background:linear-gradient(135deg, rgba(255,255,255,.20), rgba(255,255,255,.10));
+            padding:22px;
             border-radius:22px;
-            box-shadow:0 16px 40px rgba(0,0,0,.26);
-            border:1px solid rgba(255,255,255,.25);
+            background:linear-gradient(180deg, rgba(5,32,48,.9), rgba(2,17,29,.96));
+            box-shadow:0 22px 48px rgba(0,0,0,.34);
+            border:1px solid rgba(22,219,224,.35);
+            text-align:center;
         }
 
         .logo-area{
-            width:140px;
-            height:95px;
-            margin:0 auto 15px auto;
+            width:120px;
+            height:78px;
+            margin:0 auto 20px;
             display:flex;
             align-items:center;
             justify-content:center;
-            background:#ffffff;
+            background:rgba(255,255,255,.94);
             border-radius:16px;
             overflow:hidden;
-            color:#1d3557;
-            font-weight:bold;
-            font-size:23px;
-            box-shadow:0 10px 25px rgba(0,0,0,.25);
+            color:#052031;
+            font-weight:900;
+            font-size:18px;
+            box-shadow:0 18px 34px rgba(0,0,0,.26);
         }
 
         .logo-area img{
@@ -139,77 +391,348 @@
 
         .erro{
             margin-top:20px;
-            padding:15px;
-            background:linear-gradient(135deg, #d00000, #ff595e);
+            padding:12px 16px;
+            background:linear-gradient(135deg, rgba(255,42,76,.92), rgba(122,12,31,.92));
+            border:1px solid rgba(255,146,160,.35);
             border-radius:12px;
-            font-weight:bold;
-            box-shadow:0 8px 18px rgba(0,0,0,.22);
+            font-weight:900;
+            box-shadow:0 12px 24px rgba(0,0,0,.25);
         }
 
         .alerta{
-            margin:15px 0;
-            padding:12px;
-            background:linear-gradient(135deg, #06d6a0, #2a9d8f);
-            border-radius:12px;
-            font-weight:bold;
-            color:#073b4c;
+            display:inline-flex;
+            margin:10px 0 14px;
+            padding:10px 14px;
+            background:linear-gradient(135deg, rgba(9,237,137,.95), rgba(18,217,221,.86));
+            border-radius:999px;
+            font-weight:900;
+            color:#032237;
+            box-shadow:0 12px 26px rgba(0,224,173,.16);
         }
 
-        h2, h3{
+
+        .dados-nota{
+            display:grid;
+            grid-template-columns:repeat(2, minmax(0, 1fr));
+            gap:12px;
+            max-width:520px;
+            margin:14px auto 12px;
+        }
+
+        .dado-nota{
+            padding:12px 14px;
+            border-radius:14px;
+            border:1px solid rgba(20,216,224,.28);
+            background:rgba(3,20,33,.68);
+            box-shadow:inset 0 1px 0 rgba(255,255,255,.04);
+        }
+
+        .dado-nota span{
+            display:block;
+            color:#a7fbff;
+            font-size:12px;
+            font-weight:800;
+            text-transform:uppercase;
+            letter-spacing:.04em;
+            margin-bottom:4px;
+        }
+
+        .dado-nota strong{
+            display:block;
+            color:#ffffff;
+            font-size:18px;
+            line-height:1.2;
+        }
+
+        .dado-nota small{
+            display:block;
+            margin-top:4px;
+            color:#b8c7d6;
+            font-size:11px;
+        }
+
+        h2,
+        h3{
             margin:10px 0;
+        }
+
+        h2{
+            font-size:20px;
+        }
+
+        h3{
+            color:#98fbff;
+            font-size:16px;
         }
 
         p{
             word-break:break-all;
-            line-height:1.5;
-            font-size:16px;
+            line-height:1.55;
+            font-size:13px;
+            color:#d7e4ee;
         }
 
-        @media(max-width:600px){
+        .card .linha-botoes{
+            margin-top:22px;
+        }
+
+        .card button,
+        .card .botao-link{
+            min-width:200px;
+            min-height:50px;
+            font-size:12px;
+            padding:14px 18px;
+        }
+
+        .card .botao-link{
+            background:linear-gradient(135deg, #04d864, #05a99b);
+        }
+
+
+
+        .subtitulo svg{ width:20px; height:20px; }
+        .field-icon svg{ width:24px; height:24px; }
+        .button-icon svg{ width:24px; height:24px; }
+        .feature svg{ width:32px; height:32px; }
+
+        @media(max-width:950px){
             body{
                 padding:18px;
+                align-items:flex-start;
             }
 
-            h1{
-                font-size:28px;
+            .stage{
+                min-height:auto;
+                padding:34px 18px 46px;
+            }
+
+            .doc-watermark{
+                right:-48px;
+                top:48px;
+                width:180px;
+                opacity:.15;
+            }
+
+            .brand{
+                gap:14px;
+                margin-bottom:28px;
+            }
+
+            .brand-icon{
+                width:86px;
+                height:78px;
+            }
+
+            .brand-text span{
+                font-size:20px;
+            }
+
+            .brand-text strong{
+                font-size:34px;
+            }
+
+            .panel{
+                width:100%;
+                padding:26px 22px 20px;
+                border-radius:22px;
+            }
+
+            .subtitulo{
+                font-size:13px;
+                align-items:flex-start;
+            }
+
+            .field-icon{
+                width:52px;
+                height:52px;
+            }
+
+            label{
+                font-size:16px;
             }
 
             input{
-                font-size:16px;
+                min-height:52px;
+                font-size:15px;
+                padding:14px 14px;
+            }
+
+            .linha-botoes{
+                margin-top:24px;
+                gap:14px;
             }
 
             button,
             .botao-link{
                 width:100%;
+                min-width:0;
+                min-height:54px;
+                font-size:15px;
+            }
+
+            .feature-strip{
+                grid-template-columns:1fr;
+                padding:14px 18px;
+                margin-top:28px;
+            }
+
+            .feature{
+                padding:16px 0;
+            }
+
+            .feature + .feature{
+                border-left:0;
+                border-top:1px solid rgba(21,205,221,.28);
+            }
+
+            .dados-nota{
+                grid-template-columns:1fr;
+            }
+        }
+
+        @media(max-width:520px){
+            body{
+                padding:10px;
+            }
+
+            .stage{
+                border-radius:16px;
+            }
+
+            .brand{
+                flex-direction:column;
+                text-align:center;
+            }
+
+            h1{
+                font-size:22px;
+            }
+
+            .title-accent{
+                margin:18px auto 20px;
             }
         }
     </style>
 </head>
 
 <body>
+    <section class="stage" aria-label="Consulta de NF-e e NFC-e">
+        <svg class="doc-watermark" viewBox="0 0 220 260" aria-hidden="true">
+            <path d="M34 8h128l48 50v194H34z" fill="none" stroke="currentColor" stroke-width="12"/>
+            <path d="M162 8v50h48" fill="none" stroke="currentColor" stroke-width="12" stroke-linejoin="round"/>
+            <circle cx="92" cy="138" r="48" fill="none" stroke="currentColor" stroke-width="12"/>
+            <path d="M128 174l52 52" fill="none" stroke="currentColor" stroke-width="12" stroke-linecap="round"/>
+            <path d="M72 84h72M68 214h70M150 104h38M154 134h30" fill="none" stroke="currentColor" stroke-width="10" stroke-linecap="round"/>
+        </svg>
 
-    <h1>Consulta de NF-e / NFC-e</h1>
-    <p class="subtitulo">Preencha a chave de acesso com 44 números</p>
+        <header class="brand">
+            <svg class="brand-icon" viewBox="0 0 150 130" aria-hidden="true">
+                <rect x="7" y="10" width="136" height="92" rx="10" fill="rgba(1,25,40,.82)" stroke="#15dbe0" stroke-width="5"/>
+                <path d="M45 34l16-8 18 5 19-9 19 11-12 18 6 18-20 8-15 23-18-15-16 5-10-17 10-18z" fill="#16ee75" opacity=".9"/>
+                <path d="M42 63l20 12 22-27 29 22 17-31" fill="none" stroke="#021421" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M42 63l20 12 22-27 29 22 17-31" fill="none" stroke="#19f08b" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+                <circle cx="62" cy="75" r="6" fill="#031421"/>
+                <circle cx="84" cy="48" r="6" fill="#031421"/>
+                <circle cx="113" cy="70" r="6" fill="#031421"/>
+                <circle cx="130" cy="39" r="6" fill="#19f08b"/>
+                <path d="M75 102v18M51 120h48" stroke="#15dbe0" stroke-width="7" stroke-linecap="round"/>
+            </svg>
+            <div class="brand-text" aria-label="Monitor SEFAZ">
+                <span>Monitor</span>
+                <strong>SEFAZ</strong>
+            </div>
+        </header>
 
-    <div class="area-consulta">
-        <label for="chave">Chave da nota</label>
+        <main class="panel">
+            <h1>Consulta de NF-e / NFC-e</h1>
+            <span class="title-accent" aria-hidden="true"></span>
 
-        <input
-            type="text"
-            id="chave"
-            maxlength="44"
-            inputmode="numeric"
-            autocomplete="off"
-            placeholder="Digite ou cole a chave da nota"
-        >
+            <p class="subtitulo">
+                <svg width="28" height="28" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M12 3l7 3v5c0 4.6-2.8 8.8-7 10-4.2-1.2-7-5.4-7-10V6l7-3z" fill="none" stroke="currentColor" stroke-width="1.8"/>
+                    <path d="M8.8 12.1l2 2 4.4-4.8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                Preencha a chave de acesso com 44 números
+            </p>
 
-        <div class="linha-botoes">
-            <button onclick="consultarNota()">Consultar</button>
-            <button class="botao-secundario" onclick="limparChave()">Limpar</button>
-        </div>
+            <div class="field-heading">
+                <span class="field-icon" aria-hidden="true">
+                    <svg width="34" height="34" viewBox="0 0 24 24">
+                        <path d="M9.5 14.5L4 20l-2-2 5.5-5.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                        <circle cx="14.5" cy="9.5" r="5" fill="none" stroke="currentColor" stroke-width="1.8"/>
+                        <path d="M14.5 7.5h.01" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+                    </svg>
+                </span>
+                <label for="chave">CHAVE DA NOTA</label>
+            </div>
 
-        <div id="resultado"></div>
-    </div>
+            <input
+                type="text"
+                id="chave"
+                maxlength="44"
+                inputmode="numeric"
+                autocomplete="off"
+                placeholder="Digite ou cole a chave da nota (44 números)"
+            >
+
+            <div class="linha-botoes">
+                <button class="botao-primario" onclick="consultarNota()" type="button">
+                    <span class="button-icon" aria-hidden="true">
+                        <svg width="34" height="34" viewBox="0 0 24 24">
+                            <circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="currentColor" stroke-width="2.4"/>
+                            <path d="M15.5 15.5L22 22" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
+                        </svg>
+                    </span>
+                    Consultar
+                </button>
+
+                <button class="botao-secundario" onclick="limparChave()" type="button">
+                    <span class="button-icon" aria-hidden="true">
+                        <svg width="34" height="34" viewBox="0 0 24 24">
+                            <path d="M20 12a8 8 0 1 1-2.35-5.65" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+                            <path d="M20 4v6h-6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </span>
+                    Limpar
+                </button>
+            </div>
+
+            <div id="resultado"></div>
+
+            <section class="feature-strip" aria-label="Destaques da consulta">
+                <div class="feature">
+                    <svg width="46" height="46" viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M12 3l7 3v5c0 4.6-2.8 8.8-7 10-4.2-1.2-7-5.4-7-10V6l7-3z" fill="none" stroke="currentColor" stroke-width="1.7"/>
+                        <path d="M9 12l2 2 4-5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    <div>
+                        <strong>Ambiente 100% Seguro</strong>
+                        <span>Seus dados protegidos</span>
+                    </div>
+                </div>
+                <div class="feature">
+                    <svg width="46" height="46" viewBox="0 0 24 24" aria-hidden="true">
+                        <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.7"/>
+                        <path d="M12 7v6l4 3" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    <div>
+                        <strong>Consulta em tempo real</strong>
+                        <span>Direcionamento rápido</span>
+                    </div>
+                </div>
+                <div class="feature">
+                    <svg width="46" height="46" viewBox="0 0 24 24" aria-hidden="true">
+                        <rect x="5" y="3" width="14" height="18" rx="2" fill="none" stroke="currentColor" stroke-width="1.7"/>
+                        <path d="M8 8h8M8 12h8M8 16h5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+                    </svg>
+                    <div>
+                        <strong>Dados oficiais da SEFAZ</strong>
+                        <span>Fonte confiável</span>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </section>
 
 <script>
     const estados = {
@@ -282,6 +805,11 @@
         }
     });
 
+    function removerZerosEsquerda(valor){
+        const valorSemZeros = valor.replace(/^0+/, "");
+        return valorSemZeros || "0";
+    }
+
     function consultarNota(){
         const chave = campoChave.value.replace(/\D/g, "");
         const resultado = document.getElementById("resultado");
@@ -299,6 +827,10 @@
 
         const codigoUF = chave.substring(0, 2);
         const modelo = chave.substring(20, 22);
+        const serie = chave.substring(22, 25);
+        const numeroNota = chave.substring(25, 34);
+        const serieVisual = removerZerosEsquerda(serie);
+        const numeroNotaVisual = removerZerosEsquerda(numeroNota);
         const estado = estados[codigoUF];
 
         if(!estado){
@@ -354,6 +886,19 @@
                 <h2>${estado.nome} (${estado.uf})</h2>
                 <h3>${tipoDocumento}</h3>
 
+                <div class="dados-nota">
+                    <div class="dado-nota">
+                        <span>Série</span>
+                        <strong>${serieVisual}</strong>
+                        <small>Na chave: ${serie}</small>
+                    </div>
+                    <div class="dado-nota">
+                        <span>Número da nota</span>
+                        <strong>${numeroNotaVisual}</strong>
+                        <small>Na chave: ${numeroNota}</small>
+                    </div>
+                </div>
+
                 <p><strong>Chave:</strong></p>
                 <p>${chave}</p>
 
@@ -390,6 +935,5 @@
         }
     });
 </script>
-
 </body>
 </html>
